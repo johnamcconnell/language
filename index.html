@@ -185,13 +185,14 @@
   <div id="confetti"></div>
 
   <script>
-    let words = [], current = 0, showEnglishFirst = true;
+    let words = [], current = 0, languageSelected = 'english';
     let startTime = null, timerInterval;
 
     document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('languageToggle').addEventListener('change', () => {
-    showEnglishFirst = document.getElementById('languageToggle').value === 'english';
-    displayCard();
+  languageSelected = document.getElementById('languageToggle').value;
+  displayCard();
+});
   });
       const countSelect = document.getElementById('cardCount');
       [3, 5, 10, ...Array.from({length: 20}, (_, i) => (i + 2) * 10)].forEach(n => {
@@ -227,7 +228,7 @@
     function startSession() {
       const input = document.getElementById('wordInput').value.split(',').map(w => w.trim());
       const count = parseInt(document.getElementById('cardCount').value);
-      showEnglishFirst = document.getElementById('languageToggle').value === 'english';
+      showEnglishFirst = document.getElementById('languageToggle').value === 'italian';
       words = [];
       for (let i = 0; i < input.length - 1; i += 2) {
         words.push({ english: input[i], italian: input[i + 1] });
@@ -247,8 +248,8 @@
   card.classList.remove('flipped');
   setTimeout(() => {
     const word = words[current];
-    document.getElementById('cardFront').textContent = showEnglishFirst ? word.english : word.italian;
-    document.getElementById('cardBack').textContent = showEnglishFirst ? word.italian : word.english;
+    document.getElementById('cardFront').textContent = languageSelected === 'english' ? word.english : word.italian;
+    document.getElementById('cardBack').textContent = languageSelected === 'english' ? word.italian : word.english;
   }, 300);
       updateProgress();
     }
