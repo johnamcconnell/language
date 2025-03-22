@@ -205,18 +205,6 @@
   document.getElementById('csvUpload').addEventListener('change', handleCSV);
   loadSetNames();
 });
-  });
-      const countSelect = document.getElementById('cardCount');
-      [3, 5, 10, ...Array.from({length: 20}, (_, i) => (i + 2) * 10)].forEach(n => {
-        const opt = document.createElement('option');
-        opt.value = n;
-        opt.textContent = n;
-        countSelect.appendChild(opt);
-      });
-
-      document.getElementById('csvUpload').addEventListener('change', handleCSV);
-      loadSetNames();
-    });
 
     function handleCSV(evt) {
       const file = evt.target.files[0];
