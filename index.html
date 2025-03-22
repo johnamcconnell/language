@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Italian Flashcards</title>
+  <style>
+    :root {
+      --bg-color-light: #f9f9f9;
+      --bg-color-dark: #1e1e1e;
+      --card-bg-light: #ffffff;
+      --card-bg-dark: #2c2c2c;
+      --text-color-light: #000;
+      --text-color-dark: #f0f0f0;
+      --accent-color: #4a90e2;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 1em;
+      background-color: var(--bg-color-light);
+      color: var(--text-color-light);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-color-dark);
+      color: var(--text-color-dark);
+    }
+
+    h1 {
+      margin-top: 0.2em;
+      font-weight: 600;
+    }
+
+    .controls, .flashcard, .timer, .floating-button, .progress {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .controls textarea, .controls select, .controls button {
+      width: 100%;
+      padding: 0.6em;
+      margin-top: 0.5em;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .progress {
+      margin-top: 1em;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    .flashcard {
+      margin-top: 1em;
+      perspective: 1000px;
+    }
+
+    .card {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: var(--card-bg-light);
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    body.dark .card-front, body.dark .card-back {
+      background: var(--card-bg-dark);
+      border-color: #555;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .timer {
+      margin-top: 1em;
+      font-weight: 500;
+    }
+
+    .floating-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5em;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 280px;
+      background: var(--card-bg-light);
+      color: inherit;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 1em;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 20;
+    }
+
+    body.dark .modal {
+      background: var(--card-bg-dark);
+      border-color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .floating-button {
+        display: flex;
+      }
+      .controls .language-timer {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Italian Flashcards</h1>
+
+  <div class="controls">
+    <div class="language-timer">
+      <label>Show:
+        <select id="languageToggle">
+          <option value="english">English First</option>
+          <option value="italian">Italian First</option>
+        </select>
+      </label>
+      <div class="timer" id="timer">00:00</div>
+    </div>
+
+    <label>Cards to study:
+      <select id="cardCount">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+      </select>
+    </label>
+
+    <textarea id="wordInput" rows="4" placeholder="english1,italian1,english2,italian2,..."></textarea>
+    <button onclick="startSession()">Start</button>
+    <button onclick="toggleTheme()">Toggle Light/Dark</button>
+  </div>
+
+  <div class="progress" id="progressIndicator">Progress: 0 / 0</div>
+
+  <div class="flashcard">
+    <div class="card" onclick="flipCard()">
+      <div class="card-inner">
+        <div class="card-front" id="cardFront">Click Start</div>
+        <div class="card-back" id="cardBack"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="floating-button" onclick="toggleModal()">☰</button>
+
+  <div class="modal" id="mobileModal">
+    <label>Show:
+      <select id="languageToggleMobile" onchange="syncLanguageToggle(this)">
+        <option value="english">English First</option>
+        <option value="italian">Italian First</option>
+      </select>
+    </label>
+    <div class="timer" id="mobileTimer">00:00</div>
+  </div>
+
+  <script>
+    let words = [];
+    let current = 0;
+    let showEnglishFirst = true;
+    let startTime = null;
+    let timerInterval;
+    let flippedCount = 0;
+
+    function startSession() {
+      const input = document.getElementById('wordInput').value.split(',').map(w => w.trim());
+      const count = parseInt(document.getElementById('cardCount').value);
+      showEnglishFirst = document.getElementById('languageToggle').value === 'english';
+
+      words = [];
+      for (let i = 0; i < input.length - 1; i += 2) {
+        words.push({ english: input[i], italian: input[i + 1] });
+      }
+      words = words.slice(0, count);
+      current = 0;
+      flippedCount = 0;
+      resetTimer();
+      displayCard();
+      updateProgress();
+    }
+
+    function displayCard() {
+      const word = words[current];
+      document.getElementById('cardFront').textContent = showEnglishFirst ? word.english : word.italian;
+      document.getElementById('cardBack').textContent = showEnglishFirst ? word.italian : word.english;
+      document.querySelector('.card').classList.remove('flipped');
+      updateProgress();
+    }
+
+    function flipCard() {
+      const card = document.querySelector('.card');
+      card.classList.toggle('flipped');
+      if (!startTime) startTimer();
+      if (!card.classList.contains('flipped')) {
+        flippedCount++;
+        if (flippedCount >= words.length) stopTimer();
+        else {
+          setTimeout(() => {
+            current++;
+            if (current < words.length) {
+              displayCard();
+            }
+          }, 500);
+        }
+      }
+    }
+
+    function updateProgress() {
+      const progress = document.getElementById('progressIndicator');
+      progress.textContent = `Progress: ${Math.min(current + 1, words.length)} / ${words.length}`;
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const seconds = Math.floor(elapsed / 1000);
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = `${mins}:${secs}`;
+        document.getElementById('mobileTimer').textContent = `${mins}:${secs}`;
+      }, 500);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      startTime = null;
+      document.getElementById('timer').textContent = "00:00";
+      document.getElementById('mobileTimer').textContent = "00:00";
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+    }
+
+    function toggleModal() {
+      const modal = document.getElementById('mobileModal');
+      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function syncLanguageToggle(selectEl) {
+      const value = selectEl.value;
+      document.getElementById('languageToggle').value = value;
+      showEnglishFirst = value === 'english';
+      if (words.length) displayCard();
+    }
+  </script>
+</body>
+</html>
