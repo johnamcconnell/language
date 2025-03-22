@@ -171,9 +171,7 @@
     <button onclick="toggleTheme()">Toggle Light/Dark</button>
   </div>
 </div>
-</div>
-
-  <div class="progress" id="progressIndicator">Progress: 0 / 0</div>
+<div class="progress" id="progressIndicator">Progress: 0 / 0</div>
 
   <div class="flashcard">
     <div class="card" onclick="flipCard()">
@@ -222,11 +220,10 @@
     }
 
     function shuffleWords() {
-      for (let i = words.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [words[i], words[j]] = [words[j], words[i]];
-      }
-      displayCard();
+  for (let i = words.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [words[i], words[j]] = [words[j], words[i]];
+  }
     }
 
     function startSession() {
@@ -235,7 +232,7 @@
       
       words = [];
       for (let i = 0; i < input.length - 1; i += 2) {
-        words.push({ english: input[i], italian: input[i + 1] });
+        words.push({ italian: input[i], english: input[i + 1] });
       }
       words = words.slice(0, count);
       shuffleWords();
@@ -262,20 +259,28 @@
     }
 
     function prevCard() {
-      if (current > 0) {
-        current--;
-        displayCard();
-      }
+  const card = document.querySelector('.card');
+  card.classList.remove('flipped');
+  setTimeout(() => {
+    if (current > 0) {
+      current--;
+      displayCard();
     }
+  }, 200);
+}
 
     function nextCard() {
-      if (current < words.length - 1) {
-        current++;
-        displayCard();
-      } else if (current === words.length - 1) {
-        finishSession();
-      }
+  const card = document.querySelector('.card');
+  card.classList.remove('flipped');
+  setTimeout(() => {
+    if (current < words.length - 1) {
+      current++;
+      displayCard();
+    } else if (current === words.length - 1) {
+      finishSession();
     }
+  }, 200);
+}
 
     function updateProgress() {
       document.getElementById('progressIndicator').textContent = `Progress: ${current + 1} / ${words.length}`;
