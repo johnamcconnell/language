@@ -141,12 +141,7 @@
   <h1>Italian Flashcards</h1>
 
   <div class="controls">
-    <label>Show:
-      <select id="languageToggle">
-        <option value="english">English First</option>
-        <option value="italian">Italian First</option>
-      </select>
-    </label>
+    
     <label>Cards to study:
       <select id="cardCount"></select>
     </label>
@@ -185,16 +180,11 @@
   <div id="confetti"></div>
 
   <script>
-    let words = [], current = 0;//, languageSelected = 'english';
+    let words = [], current = 0;
     let startTime = null, timerInterval;
 
     document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('languageToggle').addEventListener('change', () => {
-    languageSelected = document.getElementById('languageToggle').value;
-    displayCard();
-  });
-
-  const countSelect = document.getElementById('cardCount');
+    const countSelect = document.getElementById('cardCount');
   [3, 5, 10, ...Array.from({length: 20}, (_, i) => (i + 2) * 10)].forEach(n => {
     const opt = document.createElement('option');
     opt.value = n;
@@ -228,7 +218,7 @@
     function startSession() {
       const input = document.getElementById('wordInput').value.split(',').map(w => w.trim());
       const count = parseInt(document.getElementById('cardCount').value);
-      languageSelected = document.getElementById('languageToggle').value;
+      
       words = [];
       for (let i = 0; i < input.length - 1; i += 2) {
         words.push({ english: input[i], italian: input[i + 1] });
@@ -248,8 +238,8 @@
   card.classList.remove('flipped');
   setTimeout(() => {
     const word = words[current];
-    document.getElementById('cardFront').textContent = languageSelected === 'english' ? word.english : word.italian;
-    document.getElementById('cardBack').textContent = languageSelected === 'english' ? word.italian : word.english;
+    document.getElementById('cardFront').textContent = word.italian;
+    document.getElementById('cardBack').textContent = word.english;
   }, 300);
       updateProgress();
     }
