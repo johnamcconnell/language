@@ -39,7 +39,7 @@
       text-align: center;
     }
 
-    .controls textarea, .controls select, .controls button, .controls input[type="file"] {
+    .controls textarea, .controls select, .controls button, .controls input[type="file"], .controls input[type="text"] {
       width: 100%;
       padding: 0.6em;
       margin-top: 0.5em;
@@ -152,6 +152,14 @@
     </label>
     <textarea id="wordInput" rows="4" placeholder="english1,italian1,english2,italian2,..."></textarea>
     <input type="file" id="csvUpload" accept=".csv">
+    <input type="text" id="setName" placeholder="Enter set name" />
+    <button onclick="saveSet()">Save Set</button>
+    <label>Load set:
+      <select id="loadSet" onchange="loadSet()">
+        <option value="">-- Select Saved Set --</option>
+      </select>
+    </label>
+    <button onclick="shuffleWords()">Shuffle</button>
     <button onclick="startSession()">Start</button>
     <button onclick="toggleTheme()">Toggle Light/Dark</button>
   </div>
@@ -190,6 +198,7 @@
       });
 
       document.getElementById('csvUpload').addEventListener('change', handleCSV);
+      loadSetNames();
     });
 
     function handleCSV(evt) {
@@ -203,6 +212,14 @@
       reader.readAsText(file);
     }
 
+    function shuffleWords() {
+      for (let i = words.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [words[i], words[j]] = [words[j], words[i]];
+      }
+      displayCard();
+    }
+
     function startSession() {
       const input = document.getElementById('wordInput').value.split(',').map(w => w.trim());
       const count = parseInt(document.getElementById('cardCount').value);
@@ -212,6 +229,7 @@
         words.push({ english: input[i], italian: input[i + 1] });
       }
       words = words.slice(0, count);
+      shuffleWords();
       current = 0;
       resetTimer();
       displayCard();
@@ -305,7 +323,38 @@
       }
       setTimeout(() => confetti.innerHTML = '', 2000);
     }
+
+    function saveSet() {
+      const name = document.getElementById('setName').value.trim();
+      const value = document.getElementById('wordInput').value;
+      if (name && value) {
+        localStorage.setItem(`flashcard-set-${name}`, value);
+        loadSetNames();
+        alert('Set saved!');
+      }
+    }
+
+    function loadSetNames() {
+      const dropdown = document.getElementById('loadSet');
+      dropdown.innerHTML = '<option value="">-- Select Saved Set --</option>';
+      for (let key in localStorage) {
+        if (key.startsWith('flashcard-set-')) {
+          const name = key.replace('flashcard-set-', '');
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          dropdown.appendChild(opt);
+        }
+      }
+    }
+
+    function loadSet() {
+      const name = document.getElementById('loadSet').value;
+      const value = localStorage.getItem(`flashcard-set-${name}`);
+      if (value) {
+        document.getElementById('wordInput').value = value;
+      }
+    }
   </script>
 </body>
 </html>
-
