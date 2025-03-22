@@ -189,6 +189,10 @@
     let startTime = null, timerInterval;
 
     document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('languageToggle').addEventListener('change', () => {
+    showEnglishFirst = document.getElementById('languageToggle').value === 'english';
+    displayCard();
+  });
       const countSelect = document.getElementById('cardCount');
       [3, 5, 10, ...Array.from({length: 20}, (_, i) => (i + 2) * 10)].forEach(n => {
         const opt = document.createElement('option');
@@ -238,11 +242,14 @@
     }
 
     function displayCard() {
-      if (!words[current]) return;
-      const word = words[current];
-      document.getElementById('cardFront').textContent = showEnglishFirst ? word.english : word.italian;
-      document.getElementById('cardBack').textContent = showEnglishFirst ? word.italian : word.english;
-      document.querySelector('.card').classList.remove('flipped');
+  if (!words[current]) return;
+  const card = document.querySelector('.card');
+  card.classList.remove('flipped');
+  setTimeout(() => {
+    const word = words[current];
+    document.getElementById('cardFront').textContent = showEnglishFirst ? word.english : word.italian;
+    document.getElementById('cardBack').textContent = showEnglishFirst ? word.italian : word.english;
+  }, 300);
       updateProgress();
     }
 
