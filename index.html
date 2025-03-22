@@ -143,8 +143,8 @@
   <div class="controls">
     <label>Show:
       <select id="languageToggle">
-        <option value="english">English First</option>
-        <option value="italian">Italian First</option>
+        <option value="english">English First 🇺🇸</option>
+        <option value="italian">Italian First 🇨🇮</option>
       </select>
     </label>
     <label>Cards to study:
@@ -228,7 +228,7 @@
     function startSession() {
       const input = document.getElementById('wordInput').value.split(',').map(w => w.trim());
       const count = parseInt(document.getElementById('cardCount').value);
-      showEnglishFirst = document.getElementById('languageToggle').value === 'italian';
+      languageSelected = document.getElementById('languageToggle').value;
       words = [];
       for (let i = 0; i < input.length - 1; i += 2) {
         words.push({ english: input[i], italian: input[i + 1] });
