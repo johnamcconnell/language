@@ -141,12 +141,21 @@
   <h1>Italian Flashcards</h1>
 
   <div class="controls">
-    
+  <div style="background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; padding: 1em; margin-bottom: 1.5em;">
+    <a href="https://docs.google.com/spreadsheets/d/1Frd2bWeSSNpZ4zlpu2EZit0SkeEc-B-AoI5ZyUYY7bE/edit?usp=sharing" target="_blank">
+      <button style="width: 100%; margin-top: 0.5em;">Download 1000 Most Common Words</button>
+    </a>
+  </div>
+
+  <div style="background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; padding: 1em; margin-bottom: 1.5em;">
     <label>Cards to study:
       <select id="cardCount"></select>
     </label>
     <textarea id="wordInput" rows="4" placeholder="english1,italian1,english2,italian2,..."></textarea>
     <input type="file" id="csvUpload" accept=".csv">
+  </div>
+
+  <div style="background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; padding: 1em; margin-bottom: 1.5em;">
     <input type="text" id="setName" placeholder="Enter set name" />
     <button onclick="saveSet()">Save Set</button>
     <label>Load set:
@@ -154,10 +163,15 @@
         <option value="">-- Select Saved Set --</option>
       </select>
     </label>
+  </div>
+
+  <div style="background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; padding: 1em; margin-bottom: 1.5em;">
     <button onclick="shuffleWords()">Shuffle</button>
     <button onclick="startSession()">Start</button>
     <button onclick="toggleTheme()">Toggle Light/Dark</button>
   </div>
+</div>
+</div>
 
   <div class="progress" id="progressIndicator">Progress: 0 / 0</div>
 
@@ -236,11 +250,10 @@
   if (!words[current]) return;
   const card = document.querySelector('.card');
   card.classList.remove('flipped');
-  setTimeout(() => {
-    const word = words[current];
-    document.getElementById('cardFront').textContent = word.italian;
-    document.getElementById('cardBack').textContent = word.english;
-  }, 300);
+
+  const word = words[current];
+  document.getElementById('cardFront').textContent = word.italian;
+  document.getElementById('cardBack').textContent = word.english;
       updateProgress();
     }
 
