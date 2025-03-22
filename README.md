@@ -1,2 +1,2 @@
 # language
-simple flashcards
+simple flashcards for italian
